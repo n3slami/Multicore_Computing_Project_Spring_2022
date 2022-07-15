@@ -248,7 +248,6 @@ int main()
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
 
-    auto t1 = chrono::high_resolution_clock::now();
     uint8_t *sys_img;
     uint8_t *result;
     int img_size = input_img.rows * input_img.cols * input_img.channels();
@@ -258,6 +257,7 @@ int main()
     cudaMalloc(&sys_img, padded_size);
     cudaMemcpy(sys_img + padding, input_img.data, img_size, cudaMemcpyHostToDevice);
 
+    auto t1 = chrono::high_resolution_clock::now();
     int grid_size = min((img_size + BLOCK_SIZE - 1) / BLOCK_SIZE, MAX_GRID_SIZE);
     change_brightness<<<grid_size, BLOCK_SIZE>>>(sys_img, input_img.cols,
                                 input_img.rows + 1 + input_img.channels(), input_img.channels(), -50);
@@ -268,14 +268,15 @@ int main()
         cerr << "Brightness change failed with error \"" << cudaGetErrorString(cudaerr) << "\"." << endl;
         return 1;
     }
+    auto res = chrono::high_resolution_clock::now() - t1;
     
     cudaMemcpy(input_img.data, sys_img, img_size, cudaMemcpyDeviceToHost);
-    imwrite("output_cuda_brightness.jpg", input_img);
 
     cudaMemset(sys_img, 0, padding);
     cudaMemset(sys_img + padding + img_size, 0, padding * input_img.channels());
     cudaMalloc(&result, input_img.rows * input_img.cols);
 
+    t1 = chrono::high_resolution_clock::now();
     grid_size = min((input_img.rows * input_img.cols + BLOCK_SIZE - 1) / BLOCK_SIZE, MAX_GRID_SIZE);
     dim3 block_size;
     block_size.x = BLOCK_SIZE / TILE_HEIGHT;
@@ -289,13 +290,14 @@ int main()
         cerr << "Sobel launch failed with error \"" << cudaGetErrorString(cudaerr) << "\"." << endl;
         return 1;
     }
+    res += chrono::high_resolution_clock::now() - t1;
     cudaMemcpy(output_img.data, result, input_img.rows * input_img.cols, cudaMemcpyDeviceToHost);
     cudaFree(sys_img);
     cudaFree(result);
-    auto t2 = chrono::high_resolution_clock::now();
 
-    long long microseconds = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
+    long long microseconds = chrono::duration_cast<chrono::microseconds>(res).count();
     cout << "Execution Time: " << microseconds << " microseconds" << endl;
 
+    imwrite("output_cuda_brightness.jpg", input_img);
     imwrite("output_cuda.jpg", output_img);
 }
