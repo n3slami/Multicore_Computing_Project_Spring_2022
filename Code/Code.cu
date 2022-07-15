@@ -11,7 +11,7 @@ using namespace cv;
 #define TILE_HEIGHT 8
 #define get_mean_3(img,ind) ((((int) img[ind]) + img[ind + 1] + img[ind + 2]) / 3)
 
-__global__ void change_brightness(uint8_t *img, int width, int height, int channels, uint8_t offset)
+__global__ void change_brightness(uint8_t *img, int width, int height, int channels, int offset)
 {
     const int img_byte_size = width * height * channels;
     const int unrolling = 4;
@@ -19,41 +19,42 @@ __global__ void change_brightness(uint8_t *img, int width, int height, int chann
     for (int base_index = blockIdx.x * blockDim.x * unrolling; base_index < img_byte_size; base_index += stride)
     {
         int ptr = base_index + threadIdx.x * unrolling, val;
-        uint8_t overflow, underflow;
+        int overflow, underflow;
         
         if (ptr + 3 < img_byte_size)
         {
             val = img[ptr];
             val += offset;
-            overflow = (val >> 8) & 1;
+            overflow = val > 255;
             underflow = val < 0;
             val &= (underflow - 1);
             val |= (-overflow);
-            img[ptr] = val;
+            img[ptr] = val & 255;
+
 
             val = img[ptr + 1];
             val += offset;
-            overflow = (val >> 8) & 1;
+            overflow = val > 255;
             underflow = val < 0;
             val &= (underflow - 1);
             val |= (-overflow);
-            img[ptr + 1] = val;
+            img[ptr + 1] = val & 255;
             
             val = img[ptr + 2];
             val += offset;
-            overflow = (val >> 8) & 1;
+            overflow = val > 255;
             underflow = val < 0;
             val &= (underflow - 1);
             val |= (-overflow);
-            img[ptr + 2] = val;
+            img[ptr + 2] = val & 255;
 
             val = img[ptr + 3];
             val += offset;
-            overflow = (val >> 8) & 1;
+            overflow = val > 255;
             underflow = val < 0;
             val &= (underflow - 1);
             val |= (-overflow);
-            img[ptr + 3] = val;
+            img[ptr + 3] = val & 255;
         }
         else
         {
@@ -61,11 +62,11 @@ __global__ void change_brightness(uint8_t *img, int width, int height, int chann
             {
                 val = img[ptr + i];
                 val += offset;
-                overflow = (val >> 8) & 1;
+                overflow = val > 255;
                 underflow = val < 0;
                 val &= (underflow - 1);
                 val |= (-overflow);
-                img[ptr + i] = val;
+                img[ptr + i] = val & 255;
             }
         }
     }
@@ -259,13 +260,18 @@ int main()
 
     int grid_size = min((img_size + BLOCK_SIZE - 1) / BLOCK_SIZE, MAX_GRID_SIZE);
     change_brightness<<<grid_size, BLOCK_SIZE>>>(sys_img, input_img.cols,
-                                input_img.rows + 1 + input_img.channels(), input_img.channels(), 0);
+                                input_img.rows + 1 + input_img.channels(), input_img.channels(), -50);
+    
     cudaerr = cudaDeviceSynchronize();
     if (cudaerr != cudaSuccess)
     {
         cerr << "Brightness change failed with error \"" << cudaGetErrorString(cudaerr) << "\"." << endl;
         return 1;
     }
+    
+    cudaMemcpy(input_img.data, sys_img, img_size, cudaMemcpyDeviceToHost);
+    imwrite("output_cuda_brightness.jpg", input_img);
+
     cudaMemset(sys_img, 0, padding);
     cudaMemset(sys_img + padding + img_size, 0, padding * input_img.channels());
     cudaMalloc(&result, input_img.rows * input_img.cols);
