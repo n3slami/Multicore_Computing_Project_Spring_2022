@@ -12,10 +12,11 @@ int main()
 {
     string img_path;
     img_path = "./Test_Images/01_7680x4320.jpg";
+    const int threshold_1 = 0, threshold_2 = 255;
+    const int brigtness_change = 0;
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
 
-    auto t1 = chrono::high_resolution_clock::now();
     int channels = input_img.channels();
     int img_size = input_img.rows * input_img.cols * channels;
     int row_byte_offset = input_img.cols * channels;
@@ -24,12 +25,14 @@ int main()
 
     // Apply sobel filter.
     uint8_t *tmp = new uint8_t[input_img.rows * input_img.cols];
+    uint8_t *result = new uint8_t[img_size];
+    auto t1 = chrono::high_resolution_clock::now();
     for (int i = 0; i < input_img.rows; i++)
         for (int j = 0; j < input_img.cols; j++)
             tmp[i * row_len + j] = (((int) input_img.data[i * row_byte_offset + j * channels] + 
                                             input_img.data[i * row_byte_offset + j * channels + 1] +
-                                            input_img.data[i * row_byte_offset + j * channels + 2])) / 3;
-    uint8_t *result = new uint8_t[img_size];
+                                            input_img.data[i * row_byte_offset + j * channels + 2] +
+                                            3 * brigtness_change)) / 3;
     for (int i = 0; i < input_img.rows * input_img.cols; i++)
     {
         int res_x = 0;
@@ -71,12 +74,16 @@ int main()
         res_x = abs(res_x);
         res_y = abs(res_y);
         result[i] = (res_x + res_y < 256 ? res_x + res_y : 255);
+        if (result[i] <= threshold_1)
+            result[i] = 0;
+        if (result[i] >= threshold_2)
+            result[i] = 255;
     }
     Mat output_img(input_img.rows, input_img.cols, CV_8UC1);
+    auto t2 = chrono::high_resolution_clock::now();
     memcpy(output_img.data, result, input_img.rows * input_img.cols);
     delete tmp;
     delete result;
-    auto t2 = chrono::high_resolution_clock::now();
 
     long long microseconds = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
     cout << "Execution Time: " << microseconds << " microseconds" << endl;

@@ -243,7 +243,8 @@ int main()
     cudaError_t cudaerr;
     string img_path;
     img_path = "./Test_Images/01_7680x4320.jpg";
-    const int threshold_1 = 10, threshold_2 = 240;
+    const int threshold_1 = 0, threshold_2 = 255;
+    const int brigtness_change = 0;
     // cin >> img_path;
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
@@ -260,7 +261,7 @@ int main()
     auto t1 = chrono::high_resolution_clock::now();
     int grid_size = min((img_size + BLOCK_SIZE - 1) / BLOCK_SIZE, MAX_GRID_SIZE);
     change_brightness<<<grid_size, BLOCK_SIZE>>>(sys_img, input_img.cols,
-                                input_img.rows + 1 + input_img.channels(), input_img.channels(), -50);
+                                input_img.rows + 1 + input_img.channels(), input_img.channels(), brigtness_change);
     
     cudaerr = cudaDeviceSynchronize();
     if (cudaerr != cudaSuccess)
@@ -298,6 +299,6 @@ int main()
     long long microseconds = chrono::duration_cast<chrono::microseconds>(res).count();
     cout << "Execution Time: " << microseconds << " microseconds" << endl;
 
-    imwrite("output_cuda_brightness.jpg", input_img);
-    imwrite("output_cuda.jpg", output_img);
+    imwrite("output_cuda_brightness.png", input_img);
+    imwrite("output_cuda.png", output_img);
 }
