@@ -260,7 +260,6 @@ int main(int argc, char *argv[])
     }
     const int threshold_1 = temp_threshold_1, threshold_2 = temp_threshold_2;
     const int brigtness_change = temp_brigtness_change;
-    cerr << "BRIIIIIIIIIIIIIIGHT " << temp_threshold_1 << ' ' << temp_threshold_2 << ' ' << brigtness_change << endl;
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
 
