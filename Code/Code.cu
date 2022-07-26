@@ -238,11 +238,16 @@ __global__ void tiled_sobel(uint8_t *out, uint8_t *img, int width, int height, i
 //     }
 // }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 2) {
+        cout << "Please specify the desired origin." << endl;
+        return 0;
+    }
     cudaError_t cudaerr;
     string img_path;
-    img_path = "./Test_Images/01_7680x4320.jpg";
+    img_path = argv[1];
+    // img_path = "./Test_Images/01_7680x4320.jpg";
     const int threshold_1 = 0, threshold_2 = 255;
     const int brigtness_change = 0;
     // cin >> img_path;
@@ -299,6 +304,8 @@ int main()
     long long microseconds = chrono::duration_cast<chrono::microseconds>(res).count();
     cout << "Execution Time: " << microseconds << " microseconds" << endl;
 
-    imwrite("output_cuda_brightness.png", input_img);
-    imwrite("output_cuda.png", output_img);
+    // imwrite(argv[2], output_img);
+    imwrite("./Result_Images/output_cuda_brightness.png", input_img);
+    // imwrite(argv[2], output_img);
+    imwrite("./Result_Images/output_cuda.png", output_img);
 }
