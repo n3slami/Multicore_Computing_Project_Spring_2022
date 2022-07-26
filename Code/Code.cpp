@@ -8,10 +8,15 @@ using namespace cv;
 
 #define a
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 3) {
+        cout << "Please specify the desired origin and destination." << endl;
+        return 0;
+    }
     string img_path;
-    img_path = "./Test_Images/01_7680x4320.jpg";
+    img_path = argv[1];
+    // img_path = "./Test_Images/01_7680x4320.jpg";
     const int threshold_1 = 0, threshold_2 = 255;
     const int brigtness_change = 0;
 
@@ -88,5 +93,5 @@ int main()
     long long microseconds = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
     cout << "Execution Time: " << microseconds << " microseconds" << endl;
 
-    imwrite("output.jpg", output_img);
+    imwrite(argv[2], output_img);
 }
