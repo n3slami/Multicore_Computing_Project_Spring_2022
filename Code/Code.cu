@@ -251,15 +251,16 @@ int main(int argc, char *argv[])
     // cin >> img_path;
     int temp_threshold_1, temp_threshold_2, temp_brigtness_change;
     try {
-        temp_threshold_1 = atoi(argv[3]);
-        temp_threshold_2 = atoi(argv[4]);
-        temp_brigtness_change = atoi(argv[5]);
+        temp_threshold_1 = atoi(argv[4]);
+        temp_threshold_2 = atoi(argv[5]);
+        temp_brigtness_change = atoi(argv[6]);
     } catch (int e) {
         cout << "Please specify a valid number for threshold and brightness change amount." << endl;
         return 0;
     }
     const int threshold_1 = temp_threshold_1, threshold_2 = temp_threshold_2;
     const int brigtness_change = temp_brigtness_change;
+    cerr << "BRIIIIIIIIIIIIIIGHT " << temp_threshold_1 << ' ' << temp_threshold_2 << ' ' << brigtness_change << endl;
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
 

@@ -43,10 +43,24 @@ int main(int argc, char *argv[])
     auto t1 = chrono::high_resolution_clock::now();
     for (int i = 0; i < input_img.rows; i++)
         for (int j = 0; j < input_img.cols; j++)
-            tmp[i * row_len + j] = (((int) input_img.data[i * row_byte_offset + j * channels] + 
-                                            input_img.data[i * row_byte_offset + j * channels + 1] +
-                                            input_img.data[i * row_byte_offset + j * channels + 2] +
-                                            3 * brigtness_change)) / 3;
+        {
+            int r = input_img.data[i * row_byte_offset + j * channels] + brigtness_change;
+            int b = input_img.data[i * row_byte_offset + j * channels + 1] + brigtness_change;
+            int g = input_img.data[i * row_byte_offset + j * channels + 2] + brigtness_change;
+            if (r > 256)
+                r = 255;
+            else if (r < 0)
+                r = 0;
+            if (g > 256)
+                g = 255;
+            else if (g < 0)
+                g = 0;
+            if (b > 256)
+                b = 255;
+            else if (b < 0)
+                b = 0;
+            tmp[i * row_len + j] = (r + g + b) / 3;
+        }
     for (int i = 0; i < input_img.rows * input_img.cols; i++)
     {
         int res_x = 0;
@@ -87,10 +101,10 @@ int main(int argc, char *argv[])
             res_x += ((int) tmp[i + 1]) << 1;
         res_x = abs(res_x);
         res_y = abs(res_y);
-        result[i] = (res_x + res_y < 256 ? res_x + res_y : 255);
-        if (result[i] <= threshold_1)
+        int tmp = result[i] = (res_x + res_y < 256 ? res_x + res_y : 255);
+        if (tmp <= threshold_1)
             result[i] = 0;
-        if (result[i] >= threshold_2)
+        if (tmp >= threshold_2)
             result[i] = 255;
     }
     Mat output_img(input_img.rows, input_img.cols, CV_8UC1);
