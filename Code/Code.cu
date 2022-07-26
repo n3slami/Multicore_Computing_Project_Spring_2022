@@ -240,17 +240,26 @@ __global__ void tiled_sobel(uint8_t *out, uint8_t *img, int width, int height, i
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        cout << "Please specify the desired origin." << endl;
+    if (argc < 7) {
+        cout << "Please specify the desired origin and destination (brightness and Sobel) paths." << endl;
         return 0;
     }
     cudaError_t cudaerr;
     string img_path;
     img_path = argv[1];
     // img_path = "./Test_Images/01_7680x4320.jpg";
-    const int threshold_1 = 0, threshold_2 = 255;
-    const int brigtness_change = 0;
     // cin >> img_path;
+    int temp_threshold_1, temp_threshold_2, temp_brigtness_change;
+    try {
+        temp_threshold_1 = atoi(argv[3]);
+        temp_threshold_2 = atoi(argv[4]);
+        temp_brigtness_change = atoi(argv[5]);
+    } catch (int e) {
+        cout << "Please specify a valid number for threshold and brightness change amount." << endl;
+        return 0;
+    }
+    const int threshold_1 = temp_threshold_1, threshold_2 = temp_threshold_2;
+    const int brigtness_change = temp_brigtness_change;
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
 
@@ -304,8 +313,8 @@ int main(int argc, char *argv[])
     long long microseconds = chrono::duration_cast<chrono::microseconds>(res).count();
     cout << "Execution Time: " << microseconds << " microseconds" << endl;
 
-    // imwrite(argv[2], output_img);
-    imwrite("./Result_Images/output_cuda_brightness.png", input_img);
-    // imwrite(argv[2], output_img);
-    imwrite("./Result_Images/output_cuda.png", output_img);
+    imwrite(argv[2], input_img);
+    // imwrite("./Result_Images/output_cuda_brightness.png", input_img);
+    imwrite(argv[3], output_img);
+    // imwrite("./Result_Images/output_cuda.png", output_img);
 }

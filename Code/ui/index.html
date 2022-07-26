@@ -8,8 +8,19 @@
         <form action="/result" method="post" class="main">
             <label for="myfile">Select a file:</label>
             <input type="file" id="myfile" name="myfile">
-            <input type="submit" name="type" value="CPU"></input>
-            <input type="submit" name="type" value="GPU"></input>
+            <div style="display: flex; flex-direction: row;">
+                <input type="submit" name="type" value="CPU"></input>
+                <input type="submit" name="type" value="CUDA"></input>
+            </div>
+            <br />
+            <label for="threshold_1">Select Threshold 1:</label>
+            <input type="number" name="threshold_1" alt="Threshold 1" value="0"></input>
+            <br />
+            <label for="threshold_2">Select Threshold 2:</label>
+            <input type="number" name="threshold_2" alt="Threshold 2" value="255"></input>
+            <br />
+            <label for="brightness_change">Select Brightness Offset:</label>
+            <input type="number" name="brightness_change" alt="Brightness offset" value="0"></input>
         </form>
     </body>
 </html>

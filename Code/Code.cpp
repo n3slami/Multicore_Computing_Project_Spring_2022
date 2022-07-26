@@ -10,15 +10,24 @@ using namespace cv;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 3) {
-        cout << "Please specify the desired origin and destination." << endl;
+    if (argc < 6) {
+        cout << "Please specify the desired origin, destination, threshold numbers and brightness change amount." << endl;
         return 0;
     }
     string img_path;
     img_path = argv[1];
     // img_path = "./Test_Images/01_7680x4320.jpg";
-    const int threshold_1 = 0, threshold_2 = 255;
-    const int brigtness_change = 0;
+    int temp_threshold_1, temp_threshold_2, temp_brigtness_change;
+    try {
+        temp_threshold_1 = atoi(argv[3]);
+        temp_threshold_2 = atoi(argv[4]);
+        temp_brigtness_change = atoi(argv[5]);
+    } catch (int e) {
+        cout << "Please specify a valid number for threshold and brightness change amount." << endl;
+        return 0;
+    }
+    const int threshold_1 = temp_threshold_1, threshold_2 = temp_threshold_2;
+    const int brigtness_change = temp_brigtness_change;
 
     Mat input_img = imread(img_path, IMREAD_COLOR);
 
