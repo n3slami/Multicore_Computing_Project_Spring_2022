@@ -1,6 +1,5 @@
 from flask import Flask, send_file, send_from_directory, request
 import os
-import time
 import subprocess
 
 def read_file(address):
@@ -23,7 +22,7 @@ def serve_result():
     origin_path = os.path.join('.', 'Test_Images', filename)
     if not os.path.isfile(origin_path):
         return read_file('ui/error.html').format("Please specify a valid image in the 'Test_Images' folder.")
-    result_path = os.path.join('.', 'Result_Images', str(time.time_ns()) + '-' + os.path.basename(filename))
+    result_path = os.path.join('.', 'Result_Images', 'output_' + os.path.basename(filename))
 
     if request.form.get('type') == 'CPU':
         command = ['g++ -O2 -Wall -std=c++11 Code.cpp `pkg-config --cflags --libs opencv4` && ./a.out ' + origin_path + ' ' + result_path]
