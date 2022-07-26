@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         int res_y = 0;
         bool left_bound = i % input_img.cols != 0;
         bool right_bound = i % input_img.cols != input_img.cols - 1;
-        if (i - row_len > 0)
+        if (i - row_len >= 0)
         {
             res_y += ((int) tmp[i - row_len]) << 1;
             if (left_bound)
